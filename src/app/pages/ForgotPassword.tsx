@@ -4,6 +4,7 @@ import { Button } from "../components/ui/button";
 import { Mail, AlertCircle, ArrowLeft, X, Lock } from "lucide-react";
 import logo from "../assets/625209e74220eb283ac3e2fd4d1e59d0893231ff.png";
 import { toast } from "sonner";
+import { updateUser, getAllUsers } from '../utils/myDatabase';
 
 export function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -82,7 +83,7 @@ export function ForgotPassword() {
     }
   };
 
-  const handlePasswordReset = (e: React.FormEvent) => {
+  const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (newPassword !== confirmPassword) {
@@ -99,14 +100,28 @@ export function ForgotPassword() {
       return;
     }
 
-    // Get the database from localStorage
-    const database = JSON.parse(localStorage.getItem("myDatabase") || '{"users":[]}');
+    const currentUsers = JSON.parse(localStorage.getItem("myDatabase") || '{"users":[]}');
+    const user = currentUsers.find((u: any) => u.email === email); // Get the array directly
+  
+    if (!currentUsers || currentUsers.length === 0) {
+    toast.error("Database error", { description: "No users found in system." });
+    return;
+    }
     
     // Find and update the user's password
-    const userIndex = database.users.findIndex((u: any) => u.email === email);
+    const userIndex = currentUsers.findIndex((u: any) => u.email == email);
+    const User = currentUsers.find((u: any) => u.email === email);
+
+    console.log(userIndex+" " + User.username + " " + User.id);//can read 0
     if (userIndex !== -1) {
-      database.users[userIndex].password = newPassword;
-      localStorage.setItem("myDatabase", JSON.stringify(database));
+      currentUsers[userIndex].password = newPassword;
+      try{
+      await updateUser(User.id, { password: newPassword });
+      }catch(error){
+      console.log(error);
+      }
+      console.log(newPassword);
+      localStorage.setItem("myDatabase", JSON.stringify(currentUsers));
       
       toast.success("Password reset successful!", {
         description: "You can now log in with your new password",

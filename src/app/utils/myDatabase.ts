@@ -23,6 +23,7 @@ let usersCache: UserData[] = [];
 
 // This function pulls data from the server and updates our local variable
 async function sync() {
+  usersCache = JSON.parse(localStorage.getItem("myDatabase"));
   try {
     const response = await fetch(`${API_URL}/users`);
     if (response.ok) {
@@ -30,8 +31,12 @@ async function sync() {
     }
   } catch (e) {
     console.error("Server connection failed");
+    return;
   }
+
+  localStorage.setItem("myDatabase", JSON.stringify(usersCache));
 }
+
 
 // Start syncing as soon as the file is loaded
 sync();
@@ -39,7 +44,17 @@ sync();
 // --- USER OPERATIONS ---
 
 export function getAllUsers(): UserData[] {
-  return usersCache; 
+  if (usersCache.length == 0) {
+    const localData = localStorage.getItem("myDatabase");
+    console.log(1);
+    if (localData) {
+      console.log(1);
+      const parsed = JSON.parse(localData);
+      usersCache = parsed.users || [];
+    }
+  }
+  
+  return usersCache;
 }
 
 export function getUserById(userId: string): UserData | null {
@@ -47,6 +62,7 @@ export function getUserById(userId: string): UserData | null {
 }
 
 export function getUserByEmail(email: string): UserData | null {
+  
   return usersCache.find(u => u.email.toLowerCase() === email.toLowerCase()) || null;
 }
 

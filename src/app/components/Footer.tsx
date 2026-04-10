@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { Facebook, Twitter, Instagram, Github } from "lucide-react";
-import images from "../assets/received_827456689857920.jpg";
+import images from "../assets/IMG_20260409_110623_999.webp";
 
 export function Footer() {
   return (
